@@ -1,56 +1,15 @@
-# Django CRM Project Requirements
-# Core Django Framework
 Django==5.2.4
-
-# Database
-# SQLite is included with Django, but you can add other databases here
-# psycopg2-binary==2.9.9  # For PostgreSQL
-# mysqlclient==2.2.0      # For MySQL
-
-# Data Visualization
 matplotlib==3.10.3
-
-# Web Scraping
 requests==2.32.4
 beautifulsoup4==4.13.4
-
-# Image Processing (for matplotlib charts)
 Pillow==11.3.0
-
-# Date and Time Handling
 python-dateutil==2.9.0.post0
 pytz==2025.2
-
-# HTTP and URL Handling
 urllib3==2.5.0
 certifi==2025.7.14
 charset-normalizer==3.4.2
 idna==3.10
-
-# Development and Testing (optional)
-# pytest==7.4.3
-# pytest-django==4.7.0
-# coverage==7.3.2
-
-# Production Deployment (optional)
-# gunicorn==21.2.0
-# whitenoise==6.6.0
-
-# Environment Variables (optional)
-# python-decouple==3.8
-
-# CORS for API (if needed)
-# django-cors-headers==4.3.1
-
-# REST Framework (if building APIs)
-# djangorestframework==3.14.0
-
-# Celery for Background Tasks (optional)
-# celery==5.3.4
-# redis==5.0.1
-
-# Monitoring and Logging (optional)
-# sentry-sdk==1.40.4
-
-# Security (optional)
-# django-ratelimit==4.1.0 
+pandas>=2.2.0
+numpy>=1.26.0
+sqlparse>=0.5.0
+asgiref>=3.8.0
