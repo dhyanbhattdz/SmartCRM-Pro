@@ -1,0 +1,567 @@
+{% extends 'crm_app/base.html' %}
+{% block title %}Dashboard - SmartCRM Pro{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-1">
+                        <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                    </h2>
+                    <p class="text-muted mb-0">Welcome to your CRM dashboard</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="{% url 'add_customer' %}" class="btn btn-primary">
+                        <i class="fas fa-user-plus me-2"></i>Add Customer
+                    </a>
+                    <a href="{% url 'add_lead' %}" class="btn btn-success">
+                        <i class="fas fa-plus me-2"></i>Add Lead
+                    </a>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="stats-card">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="stats-number">{{ customers.paginator.count }}</div>
+                        <div class="text-muted">Total Customers</div>
+                    </div>
+                    <div class="stats-icon">
+                        <i class="fas fa-users fa-2x text-primary"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-6">
+            <div class="stats-card">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="stats-number">{{ leads.paginator.count }}</div>
+                        <div class="text-muted">Total Leads</div>
+                    </div>
+                    <div class="stats-icon">
+                        <i class="fas fa-chart-line fa-2x text-success"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+         
+
+        <!-- Won Leads Card -->
+        <div class="col-md-3 mb-3">
+            <div class="stats-card bg-success-light">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="stats-number">{{ won_leads_count }}</div>
+                        <div class="text-muted">Won Leads</div>
+                    </div>
+                    <div class="stats-icon">
+                        <i class="fas fa-trophy fa-2x text-success"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lost Leads Card -->
+        <div class="col-md-3 mb-3">
+            <div class="stats-card bg-danger-light">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="stats-number">{{ lost_leads_count }}</div>
+                        <div class="text-muted">Lost Leads</div>
+                    </div>
+                    <div class="stats-icon">
+                        <i class="fas fa-times-circle fa-2x text-danger"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+        
+        
+        </div>
+    </div>
+
+    <!-- Main Content Tabs - Customers and Leads First -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <ul class="nav nav-tabs card-header-tabs" id="mainTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="customers-tab" data-bs-toggle="tab" data-bs-target="#customers" type="button" role="tab">
+                                <i class="fas fa-users me-2"></i>Customers
+                                <span class="badge bg-primary ms-2">{{ customers.paginator.count }}</span>
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="leads-tab" data-bs-toggle="tab" data-bs-target="#leads" type="button" role="tab">
+                                <i class="fas fa-chart-line me-2"></i>Leads
+                                <span class="badge bg-success ms-2">{{ leads.paginator.count }}</span>
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body">
+                    <div class="tab-content" id="mainTabsContent">
+                        <!-- Customers Tab -->
+                        <div class="tab-pane fade show active" id="customers" role="tabpanel">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="mb-0">Customer Management</h6>
+                                <div class="d-flex gap-2">
+                                    <form method="GET" class="d-flex" id="customer-search-form">
+                                        <input type="text" name="search" value="{{ query }}" class="form-control me-2" 
+                                               placeholder="Search customers...">
+                                        <button type="submit" class="btn btn-outline-primary">
+                                            <i class="fas fa-search"></i>
+                                        </button>
+                                    </form>
+                                    <a href="{% url 'upload_customers' %}" class="btn btn-outline-secondary">
+                                        <i class="fas fa-upload me-1"></i>Upload
+                                    </a>
+                                    <form method="post" action="{% url 'delete_all_customers' %}" onsubmit="return confirm('Are you sure you want to delete ALL customers? This cannot be undone!');">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">
+            <i class="fas fa-trash"></i> Delete All Customers
+        </button>
+    </form>
+                                </div>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Email</th>
+                                            <th>Phone</th>
+                                            <th>Company</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for customer in customers %}
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="avatar me-3">
+                                                        <i class="fas fa-user-circle fa-2x text-primary"></i>
+                                                    </div>
+                                                    <div>
+                                                        <div class="fw-bold">{{ customer.name }}</div>
+                                                        <small class="text-muted">Added {{ customer.created_at|date:"M d, Y" }}</small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>{{ customer.email }}</td>
+                                            <td>{{ customer.phone }}</td>
+                                            <td>
+                                                {% if customer.company %}
+                                                    <span class="badge bg-light text-dark">{{ customer.company }}</span>
+                                                {% else %}
+                                                    <span class="text-muted">-</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm">
+                                                    <a href="{% url 'edit_customer' customer.id %}" class="btn btn-outline-warning" title="Edit">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <a href="{% url 'send_lead_reminders' customer.id %}" class="btn btn-outline-info" title="Send Reminder">
+                                                        <i class="fas fa-bell"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="5" class="text-center py-4">
+                                                <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                                                <p class="text-muted">No customers found</p>
+                                                <a href="{% url 'add_customer' %}" class="btn btn-primary">
+                                                    <i class="fas fa-plus me-2"></i>Add Your First Customer
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            {% if customers.has_other_pages %}
+                            <nav aria-label="Customer pagination" class="mt-3">
+                                <ul class="pagination justify-content-center">
+                                    {% if customers.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?customer_page={{ customers.previous_page_number }}&lead_page={{ lead_page }}{% if query %}&search={{ query }}{% endif %}&tab=customers">
+                                            <i class="fas fa-chevron-left"></i>
+                                        </a>
+                                    </li>
+                                    {% endif %}
+                                    
+                                    {% for num in customers.paginator.page_range %}
+                                        {% if customers.number == num %}
+                                            <li class="page-item active">
+                                                <span class="page-link">{{ num }}</span>
+                                            </li>
+                                        {% elif num > customers.number|add:'-3' and num < customers.number|add:'3' %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="?customer_page={{ num }}&lead_page={{ lead_page }}{% if query %}&search={{ query }}{% endif %}&tab=customers">{{ num }}</a>
+                                            </li>
+                                        {% endif %}
+                                    {% endfor %}
+                                    
+                                    {% if customers.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?customer_page={{ customers.next_page_number }}&lead_page={{ lead_page }}{% if query %}&search={{ query }}{% endif %}&tab=customers">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </a>
+                                    </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                            {% endif %}
+                        </div>
+
+                        <!-- Leads Tab -->
+                        <div class="tab-pane fade" id="leads" role="tabpanel">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="mb-0">Lead Management</h6>
+                                <div class="d-flex gap-2">
+                                    <div class="dropdown">
+                                        <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                            <i class="fas fa-sort me-1"></i>Sort
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li><a class="dropdown-item" href="?lead_page={{ lead_page }}&customer_page={{ customer_page }}&sort_by=follow_up_date&tab=leads">Follow-up Date</a></li>
+                                            <li><a class="dropdown-item" href="?lead_page={{ lead_page }}&customer_page={{ customer_page }}&sort_by=-follow_up_date&tab=leads">Follow-up Date (Desc)</a></li>
+                                            <li><a class="dropdown-item" href="?lead_page={{ lead_page }}&customer_page={{ customer_page }}&sort_by=created_at&tab=leads">Created Date</a></li>
+                                            <li><a class="dropdown-item" href="?lead_page={{ lead_page }}&customer_page={{ customer_page }}&sort_by=-created_at&tab=leads">Created Date (Desc)</a></li>
+                                            <li><a class="dropdown-item" href="?lead_page={{ lead_page }}&customer_page={{ customer_page }}&sort_by=title&tab=leads">Title</a></li>
+                                        </ul>
+                                    </div>
+                                    <a href="{% url 'upload_leads' %}" class="btn btn-outline-secondary">
+                                        <i class="fas fa-upload me-1"></i>Upload
+                                    </a>
+                                    <form method="post" action="{% url 'delete_all_leads' %}" onsubmit="return confirm('Are you sure you want to delete ALL leads? This cannot be undone!');" class="mt-2">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">
+            <i class="fas fa-trash"></i> Delete All Leads
+        </button>
+    </form>
+                                </div>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Lead</th>
+                                            <th>Customer</th>
+                                            <th>Status</th>
+                                            <th>Follow-up</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for lead in leads %}
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="avatar me-3">
+                                                        <i class="fas fa-bullseye fa-2x text-success"></i>
+                                                    </div>
+                                                    <div>
+                                                        <div class="fw-bold">{{ lead.title }}</div>
+                                                        <small class="text-muted">Created {{ lead.created_at|date:"M d, Y" }}</small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>{{ lead.customer.name }}</td>
+                                            <td>
+                                                <span class="badge 
+                                                    {% if lead.status == 'won' %}bg-success
+                                                    {% elif lead.status == 'lost' %}bg-danger
+                                                    {% elif lead.status == 'qualified' %}bg-warning
+                                                    {% elif lead.status == 'contacted' %}bg-info
+                                                    {% else %}bg-secondary{% endif %}">
+                                                    {{ lead.status|title }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                {% if lead.follow_up_date %}
+                                                    <span class="text-muted">{{ lead.follow_up_date|date:"M d, Y" }}</span>
+                                                {% else %}
+                                                    <span class="text-muted">-</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm">
+                                                    <a href="{% url 'edit_lead' lead.id %}" class="btn btn-outline-warning" title="Edit">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <a href="{% url 'delete_lead' lead.id %}" class="btn btn-outline-danger" title="Delete"
+                                                       onclick="return confirm('Are you sure you want to delete this lead?')">
+                                                        <i class="fas fa-trash"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="5" class="text-center py-4">
+                                                <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
+                                                <p class="text-muted">No leads found</p>
+                                                <a href="{% url 'add_lead' %}" class="btn btn-success">
+                                                    <i class="fas fa-plus me-2"></i>Add Your First Lead
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            {% if leads.has_other_pages %}
+                            <nav aria-label="Lead pagination" class="mt-3">
+                                <ul class="pagination justify-content-center">
+                                    {% if leads.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?lead_page={{ leads.previous_page_number }}&customer_page={{ customer_page }}{% if sort_by %}&sort_by={{ sort_by }}{% endif %}&tab=leads">
+                                            <i class="fas fa-chevron-left"></i>
+                                        </a>
+                                    </li>
+                                    {% endif %}
+                                    
+                                    {% for num in leads.paginator.page_range %}
+                                        {% if leads.number == num %}
+                                            <li class="page-item active">
+                                                <span class="page-link">{{ num }}</span>
+                                            </li>
+                                        {% elif num > leads.number|add:'-3' and num < leads.number|add:'3' %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="?lead_page={{ num }}&customer_page={{ customer_page }}{% if sort_by %}&sort_by={{ sort_by }}{% endif %}&tab=leads">{{ num }}</a>
+                                            </li>
+                                        {% endif %}
+                                    {% endfor %}
+                                    
+                                    {% if leads.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?lead_page={{ leads.next_page_number }}&customer_page={{ customer_page }}{% if sort_by %}&sort_by={{ sort_by }}{% endif %}&tab=leads">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </a>
+                                    </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Section - Now Below Customers and Leads -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-area me-2"></i>Analytics Dashboard
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if pie_chart or bar_chart %}
+                        <div class="row">
+                            {% if pie_chart %}
+                            <div class="col-md-6 mb-4">
+                                <div class="chart-container">
+                                    <h6 class="text-center mb-3">
+                                        <i class="fas fa-chart-pie me-2"></i>Lead Status Distribution
+                                    </h6>
+                                    <img src="data:image/png;base64,{{ pie_chart }}" class="img-fluid chart-image" alt="Lead Status Chart">
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {% if bar_chart %}
+                            <div class="col-md-6 mb-4">
+                                <div class="chart-container">
+                                    <h6 class="text-center mb-3">
+                                        <i class="fas fa-chart-bar me-2"></i>Monthly Lead Trend
+                                    </h6>
+                                    <img src="data:image/png;base64,{{ bar_chart }}" class="img-fluid chart-image" alt="Monthly Trend Chart">
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        {% if status_bar_chart %}
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="chart-container">
+                                    <h6 class="text-center mb-3">
+                                        <i class="fas fa-chart-line me-2"></i>Lead Status Overview
+                                    </h6>
+                                    <img src="data:image/png;base64,{{ status_bar_chart }}" class="img-fluid chart-image" alt="Status Bar Chart">
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-chart-line fa-4x text-muted mb-3"></i>
+                            <h5 class="text-muted">No Data Available</h5>
+                            <p class="text-muted">Add some leads to see analytics charts</p>
+                            <a href="{% url 'add_lead' %}" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>Add Your First Lead
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .stats-icon {
+        opacity: 0.7;
+    }
+    
+    .avatar {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .nav-tabs .nav-link {
+        border: none;
+        color: #e0e0e0;
+        border-radius: 10px 10px 0 0;
+        margin-right: 5px;
+    }
+    
+    .nav-tabs .nav-link.active {
+        background: var(--primary-gradient);
+        color: white;
+        border: none;
+    }
+    
+    .nav-tabs .nav-link:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: #e0e0e0;
+    }
+    
+    .table td {
+        vertical-align: middle;
+    }
+    
+    .btn-group .btn {
+        border-radius: 8px;
+        margin: 0 2px;
+    }
+    
+    .chart-container {
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: 15px;
+        padding: 1.5rem;
+        border: 1px solid var(--card-border);
+    }
+    
+    .chart-image {
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .pagination .page-link {
+        background: var(--card-bg);
+        border-color: var(--card-border);
+        color: #e0e0e0;
+    }
+    
+    .pagination .page-link:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: var(--card-border);
+        color: #fff;
+    }
+    
+    .pagination .page-item.active .page-link {
+        background: var(--primary-gradient);
+        border-color: transparent;
+    }
+    
+    .dropdown-menu {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+    }
+    
+    .dropdown-item {
+        color: #e0e0e0;
+    }
+    
+    .dropdown-item:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: #fff;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Get the current tab from URL parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentTab = urlParams.get('tab') || 'customers';
+    
+    // Activate the correct tab
+    if (currentTab === 'leads') {
+        // Switch to leads tab
+        const leadsTab = document.getElementById('leads-tab');
+        const customersTab = document.getElementById('customers-tab');
+        const leadsContent = document.getElementById('leads');
+        const customersContent = document.getElementById('customers');
+        
+        // Remove active class from customers
+        customersTab.classList.remove('active');
+        customersContent.classList.remove('show', 'active');
+        
+        // Add active class to leads
+        leadsTab.classList.add('active');
+        leadsContent.classList.add('show', 'active');
+    }
+    
+    // Handle tab switching to maintain state
+    const tabButtons = document.querySelectorAll('[data-bs-toggle="tab"]');
+    tabButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            const targetTab = this.getAttribute('data-bs-target').replace('#', '');
+            const currentUrl = new URL(window.location);
+            currentUrl.searchParams.set('tab', targetTab);
+            window.history.replaceState({}, '', currentUrl);
+        });
+    });
+    
+    // Handle search form submission to maintain tab state
+    const searchForm = document.getElementById('customer-search-form');
+    if (searchForm) {
+        searchForm.addEventListener('submit', function(e) {
+            const currentUrl = new URL(window.location);
+            currentUrl.searchParams.set('tab', 'customers');
+            currentUrl.searchParams.set('customer_page', '1'); // Reset to first page
+            window.history.replaceState({}, '', currentUrl);
+        });
+    }
+});
+</script>
+{% endblock %}

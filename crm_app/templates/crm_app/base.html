@@ -1,0 +1,481 @@
+    <!DOCTYPE html>
+    <html lang="en" data-bs-theme="dark">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>{% block title %}SmartCRM Pro{% endblock %}</title>
+        
+        <!-- Favicon -->
+        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚀</text></svg>">
+        
+        <!-- Bootstrap CSS -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+        
+        <!-- Font Awesome -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        
+        <!-- Google Fonts -->
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+        
+        <!-- FullCalendar CSS -->
+        <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css' rel='stylesheet' />
+        
+        <style>
+            :root {
+                --bs-body-font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+                --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+                --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+                --warning-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+                --danger-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+                --dark-bg: #0f0f23;
+                --card-bg: #1a1a2e;
+                --card-border: #2d2d42;
+            }
+            
+            body {
+                background: var(--dark-bg);
+                color: #e0e0e0;
+                font-family: 'Poppins', sans-serif;
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+            }
+            
+            .navbar {
+                background: var(--primary-gradient) !important;
+                backdrop-filter: blur(10px);
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+                position: sticky;
+                top: 0;
+                z-index: 1000;
+            }
+            
+            .navbar-brand {
+                font-weight: 800;
+                font-size: 1.5rem;
+                letter-spacing: -0.5px;
+            }
+            
+            .card {
+                background: var(--card-bg);
+                border: 1px solid var(--card-border);
+                border-radius: 15px;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+                transition: all 0.3s ease;
+                backdrop-filter: blur(10px);
+            }
+            
+            .card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+            }
+            
+            .card-header {
+                background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+                border-bottom: 1px solid var(--card-border);
+                border-radius: 15px 15px 0 0 !important;
+                font-weight: 600;
+            }
+            
+            .btn {
+                border-radius: 10px;
+                font-weight: 500;
+                padding: 0.5rem 1.5rem;
+                transition: all 0.3s ease;
+            }
+            
+            .btn-primary {
+                background: var(--primary-gradient);
+                border: none;
+            }
+            
+            .btn-success {
+                background: var(--success-gradient);
+                border: none;
+            }
+            
+            .btn-warning {
+                background: var(--warning-gradient);
+                border: none;
+            }
+            
+            .btn-danger {
+                background: var(--danger-gradient);
+                border: none;
+            }
+            
+            .btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            }
+            
+            .table {
+                background: var(--card-bg);
+                border-radius: 15px;
+                overflow: hidden;
+            }
+            
+            .table thead th {
+                background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+                border-bottom: 1px solid var(--card-border);
+                font-weight: 600;
+                color: #fff;
+            }
+            
+            .table tbody tr {
+                transition: all 0.3s ease;
+            }
+            
+            .table tbody tr:hover {
+                background: rgba(255, 255, 255, 0.05);
+                transform: scale(1.01);
+            }
+            
+            .badge {
+                border-radius: 20px;
+                font-weight: 500;
+                padding: 0.5rem 1rem;
+            }
+            
+            .alert {
+                border-radius: 15px;
+                border: none;
+                backdrop-filter: blur(10px);
+            }
+            
+            .form-control, .form-select {
+                background: rgba(255, 255, 255, 0.05);
+                border: 1px solid var(--card-border);
+                border-radius: 10px;
+                color: #e0e0e0;
+            }
+            
+            .form-control:focus, .form-select:focus {
+                background: rgba(255, 255, 255, 0.1);
+                border-color: #667eea;
+                box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+                color: #fff;
+            }
+            
+            .form-control::placeholder {
+                color: rgba(255, 255, 255, 0.5);
+            }
+            
+            .sidebar {
+                background: var(--card-bg);
+                border-right: 1px solid var(--card-border);
+                min-height: 100vh;
+            }
+            
+            .sidebar .nav-link {
+                color: #e0e0e0;
+                border-radius: 10px;
+                margin: 0.2rem 0;
+                transition: all 0.3s ease;
+            }
+            
+            .sidebar .nav-link:hover {
+                background: rgba(255, 255, 255, 0.1);
+                transform: translateX(5px);
+            }
+            
+            .sidebar .nav-link.active {
+                background: var(--primary-gradient);
+                color: white;
+            }
+            
+            .stats-card {
+                background: var(--card-bg);
+                border-radius: 20px;
+                padding: 2rem;
+                text-align: center;
+                position: relative;
+                overflow: hidden;
+            }
+            
+            .stats-card::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 4px;
+                background: var(--primary-gradient);
+            }
+            
+            .stats-number {
+                font-size: 2.5rem;
+                font-weight: 800;
+                background: var(--primary-gradient);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+            }
+            
+            .footer {
+                background: var(--card-bg);
+                border-top: 1px solid var(--card-border);
+                padding: 2rem 0;
+                margin-top: auto;
+            }
+            
+            /* Custom scrollbar */
+            ::-webkit-scrollbar {
+                width: 8px;
+            }
+            
+            ::-webkit-scrollbar-track {
+                background: var(--card-bg);
+            }
+            
+            ::-webkit-scrollbar-thumb {
+                background: var(--primary-gradient);
+                border-radius: 10px;
+            }
+            
+            ::-webkit-scrollbar-thumb:hover {
+                background: var(--secondary-gradient);
+            }
+            
+            /* Animations */
+            @keyframes fadeInUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(30px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+            
+            .fade-in-up {
+                animation: fadeInUp 0.6s ease-out;
+            }
+            
+            /* Loading spinner */
+            .loading-spinner {
+                width: 40px;
+                height: 40px;
+                border: 4px solid rgba(255, 255, 255, 0.1);
+                border-left: 4px solid #667eea;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+            }
+            
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+            
+            /* Theme toggle button */
+            .theme-toggle {
+                width: 40px;
+                height: 40px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 50%;
+                background: rgba(255, 255, 255, 0.1);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                color: #e0e0e0;
+                transition: all 0.3s ease;
+            }
+            
+            .theme-toggle:hover {
+                background: rgba(255, 255, 255, 0.2);
+                transform: scale(1.1);
+            }
+            
+            /* Light theme overrides */
+            [data-bs-theme="light"] {
+                --dark-bg: #f8f9fa;
+                --card-bg: #ffffff;
+                --card-border: #dee2e6;
+            }
+            
+            [data-bs-theme="light"] body {
+                background: var(--dark-bg);
+                color: #333;
+            }
+            
+            [data-bs-theme="light"] .card {
+                background: var(--card-bg);
+                border: 1px solid var(--card-border);
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            }
+            
+            [data-bs-theme="light"] .table thead th {
+                background: #f8f9fa;
+                color: #333;
+            }
+            
+            [data-bs-theme="light"] .form-control,
+            [data-bs-theme="light"] .form-select {
+                background: #ffffff;
+                border: 1px solid #ced4da;
+                color: #333;
+            }
+        </style>
+    </head>
+    <body>
+    
+
+        <nav class="navbar navbar-expand-lg navbar-dark">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="{% url 'home' %}">
+                    <i class="fas fa-rocket me-2"></i>SmartCRM Pro
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'home' %}">
+                                <i class="fas fa-tachometer-alt me-1"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'add_customer' %}">
+                                <i class="fas fa-user-plus me-1"></i> Add Customer
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'add_lead' %}">
+                                <i class="fas fa-plus-circle me-1"></i> Add Lead
+                            </a>
+                        </li>
+                        <!-- <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <i class="fas fa-brain me-1"></i> AI Predictor
+                            </a>
+                        </li> -->
+                        <li class="nav-item">
+                <a class="nav-link" href="{% url 'export_customers_csv' %}">
+                    <i class="fas fa-file-export me-1"></i> Export
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'calendar' %}">
+                    <i class="fas fa-calendar-alt me-1"></i> Calendar
+                </a>
+            </li>
+                    </ul>
+                    <ul class="navbar-nav ms-auto">
+                            <!-- Navbar -->
+        <ul class="navbar-nav ms-auto me-3">
+    {% if user.is_authenticated %}
+        <li class="nav-item">
+        <span class="nav-link">Welcome, {{ user.username }}</span>
+        </li>
+        <li class="nav-item">
+        <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+        </li>
+    {% else %}
+        <li class="nav-item">
+        <a class="nav-link" href="{% url 'login' %}">Login</a>
+        </li>
+        <li class="nav-item">
+        <a class="nav-link" href="{% url 'register' %}">Register</a>
+        </li>
+    {% endif %}
+    </ul>
+            
+            
+    
+        <!-- <li class="nav-item ms-2">
+            <button class="btn theme-toggle" title="Toggle theme" id="themeToggle">
+                <i class="fas fa-moon"></i>
+            </button>
+        </li> -->
+    </ul>
+
+                </div>
+            </div>
+
+        </nav>
+
+        <!-- Main Content -->
+        <main class="flex-grow-1">
+            <!-- Flash Messages -->
+            {% if messages %}
+            <div class="container-fluid mt-3">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show fade-in-up" role="alert">
+                    <div class="d-flex align-items-center">
+                        <i class="fas 
+                            {% if message.tags == 'success' %}fa-check-circle
+                            {% elif message.tags == 'info' %}fa-info-circle
+                            {% elif message.tags == 'warning' %}fa-exclamation-triangle
+                            {% else %}fa-exclamation-circle
+                            {% endif %} me-2"></i>
+                        <div>{{ message }}</div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            {% block content %}{% endblock %}
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer text-center">
+            <div class="container">
+                <div class="text-muted">
+                    © {{ year }} SmartCRM Pro | Built with <i class="fas fa-heart text-danger"></i> by Dhyan
+                </div>
+            </div>
+        </footer>
+
+        <!-- Scripts -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+        <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.js'></script>
+        
+        <script>
+            // Theme toggle functionality
+            const themeToggle = document.getElementById('themeToggle');
+            const htmlTag = document.documentElement;
+            const currentTheme = localStorage.getItem('theme') || 'dark';
+            
+            // Apply saved theme
+            if (currentTheme === 'light') {
+                htmlTag.setAttribute('data-bs-theme', 'light');
+                themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+            } else {
+                htmlTag.setAttribute('data-bs-theme', 'dark');
+                themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+            }
+            
+            // Toggle theme on button click
+            themeToggle.addEventListener('click', () => {
+                const newTheme = htmlTag.getAttribute('data-bs-theme') === 'light' ? 'dark' : 'light';
+                htmlTag.setAttribute('data-bs-theme', newTheme);
+                themeToggle.innerHTML = newTheme === 'dark' ? '<i class="fas fa-moon"></i>' : '<i class="fas fa-sun"></i>';
+                localStorage.setItem('theme', newTheme);
+            });
+            
+            // Add fade-in animation to cards
+            document.addEventListener('DOMContentLoaded', function() {
+                const cards = document.querySelectorAll('.card');
+                cards.forEach((card, index) => {
+                    card.style.animationDelay = `${index * 0.1}s`;
+                    card.classList.add('fade-in-up');
+                });
+                
+                // Initialize tooltips
+                const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                tooltipTriggerList.map(function (tooltipTriggerEl) {
+                    return new bootstrap.Tooltip(tooltipTriggerEl);
+                });
+            });
+        </script>
+        
+        {% block extra_scripts %}{% endblock %}
+    </body>
+    </html>

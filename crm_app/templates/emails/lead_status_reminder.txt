@@ -1,0 +1,13 @@
+Dear {{ customer.name }},
+
+Here's the current status of your leads with us:
+
+{% for lead in leads %}
+- {{ lead.title }}: {{ lead.status }} (Last Updated: {{ lead.updated_at|date:"M d, Y" }})
+{% endfor %}
+
+Please don't hesitate to contact us if you have any questions.
+
+Best regards,
+SmartCRM-AI
+{{ date }}

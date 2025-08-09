@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <p>Dear {{ customer.name }},</p>
+    
+    <p>Here's the current status of your leads with us:</p>
+    
+    <ul>
+    {% for lead in leads %}
+        <li>
+            <strong>{{ lead.title }}</strong>: 
+            <span style="color: {% if lead.status == 'Won' %}green{% elif lead.status == 'Lost' %}red{% else %}orange{% endif %}">
+                {{ lead.status }}
+            </span>
+            (Last Updated: {{ lead.updated_at|date:"M d, Y" }})
+        </li>
+    {% endfor %}
+    </ul>
+    
+    <p>Please don't hesitate to contact us if you have any questions.</p>
+    
+    <p>Best regards,<br>
+    SmartCRM-AI<br>
+    {{ date }}</p>
+</body>
+</html>

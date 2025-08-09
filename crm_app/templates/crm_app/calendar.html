@@ -1,0 +1,412 @@
+{% extends 'crm_app/base.html' %}
+
+{% block title %}Calendar - SmartCRM Pro{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="mb-1">
+                        <i class="fas fa-calendar-alt me-2"></i>Calendar
+                    </h2>
+                    <p class="text-muted mb-0">View and manage your lead follow-ups</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <button id="theme-toggle" class="btn btn-outline-secondary">
+                        <i class="fas fa-moon me-2" id="theme-icon"></i>
+                        <span id="theme-text">Dark Mode</span>
+                    </button>
+                    <a href="{% url 'add_lead' %}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Add Lead
+                    </a>
+                    <a href="{% url 'home' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-lg">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-calendar me-2"></i>Lead Follow-up Calendar
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <div id="calendar"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- FullCalendar CSS and JS -->
+<link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css' rel='stylesheet' />
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
+
+<style>
+    /* CSS Variables - Default to dark mode */
+    :root {
+        /* Base colors */
+        --text-color: #e0e0e0;
+        --border-color: #2d2d42;
+        --card-bg: #1e1e2d;
+        --header-bg: rgba(255, 255, 255, 0.05);
+        
+        /* Calendar colors */
+        --day-bg: rgba(255, 255, 255, 0.02);
+        --day-hover-bg: rgba(255, 255, 255, 0.05);
+        --today-bg: rgba(102, 126, 234, 0.1);
+        --other-day-bg: rgba(255, 255, 255, 0.01);
+        --other-day-text: rgba(255, 255, 255, 0.3);
+        
+        /* Event colors */
+        --event-bg: #667eea;
+        --event-text: #ffffff;
+        --event-dot-color: #667eea;
+        
+        /* Button colors */
+        --button-bg: rgba(255, 255, 255, 0.1);
+        --button-hover-bg: rgba(255, 255, 255, 0.2);
+        
+        /* List view colors */
+        --list-event-bg: rgba(255, 255, 255, 0.08);
+        --list-event-border: rgba(255, 255, 255, 0.15);
+        --list-event-hover-bg: rgba(102, 126, 234, 0.25);
+        --list-event-hover-border: #667eea;
+        --list-event-hover-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        --list-event-title: #ffffff;
+        --list-event-time: rgba(255, 255, 255, 0.85);
+        --list-day-text: #ffffff;
+        --list-day-side-text: rgba(255, 255, 255, 0.85);
+        --list-day-bg: rgba(255, 255, 255, 0.1);
+        --list-day-border: rgba(255, 255, 255, 0.2);
+        
+        /* Gradients */
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --secondary-gradient: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    }
+
+    /* Light mode overrides */
+    [data-theme="light"] {
+        --text-color: #333333;
+        --border-color: #dee2e6;
+        --card-bg: #ffffff;
+        --header-bg: #f8f9fa;
+        
+        --day-bg: rgba(0, 0, 0, 0.02);
+        --day-hover-bg: rgba(0, 0, 0, 0.05);
+        --today-bg: rgba(102, 126, 234, 0.1);
+        --other-day-bg: rgba(0, 0, 0, 0.01);
+        --other-day-text: rgba(0, 0, 0, 0.3);
+        
+        --button-bg: rgba(0, 0, 0, 0.1);
+        --button-hover-bg: rgba(0, 0, 0, 0.2);
+        
+        --list-event-bg: rgba(0, 0, 0, 0.03);
+        --list-event-border: rgba(0, 0, 0, 0.1);
+        --list-event-hover-bg: rgba(102, 126, 234, 0.15);
+        --list-event-hover-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        --list-event-title: #333333;
+        --list-event-time: rgba(0, 0, 0, 0.7);
+        --list-day-text: #333333;
+        --list-day-side-text: rgba(0, 0, 0, 0.7);
+        --list-day-bg: rgba(0, 0, 0, 0.04);
+        --list-day-border: rgba(0, 0, 0, 0.1);
+    }
+
+    /* Base calendar styles */
+    .fc {
+        background: var(--card-bg);
+        border-radius: 15px;
+        padding: 1rem;
+        color: var(--text-color);
+    }
+    
+    .fc-theme-standard td, .fc-theme-standard th {
+        border-color: var(--border-color);
+    }
+    
+    .fc-theme-standard .fc-scrollgrid {
+        border-color: var(--border-color);
+    }
+    
+    /* Day grid styles */
+    .fc-daygrid-day {
+        background: var(--day-bg);
+        transition: all 0.3s ease;
+    }
+    
+    .fc-daygrid-day:hover {
+        background: var(--day-hover-bg);
+        transform: scale(1.02);
+    }
+    
+    .fc-day-today {
+        background: var(--today-bg) !important;
+    }
+    
+    /* Event styles */
+    .fc-event {
+        background: var(--event-bg) !important;
+        border: none !important;
+        border-radius: 8px !important;
+        padding: 2px 6px !important;
+        font-size: 0.85rem !important;
+        font-weight: 500 !important;
+        color: var(--event-text) !important;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .fc-event:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* Button styles */
+    .fc-button-primary {
+        background: var(--primary-gradient) !important;
+        border: none !important;
+        border-radius: 8px !important;
+        font-weight: 500 !important;
+        color: white !important;
+    }
+    
+    .fc-button-primary:hover {
+        background: var(--secondary-gradient) !important;
+        transform: translateY(-1px);
+    }
+    
+    .fc-button-primary:focus {
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25) !important;
+    }
+    
+    .fc-toolbar-title {
+        color: var(--text-color) !important;
+        font-weight: 600;
+    }
+    
+    .fc-col-header-cell {
+        background: var(--header-bg) !important;
+        color: var(--text-color) !important;
+        font-weight: 600 !important;
+    }
+    
+    .fc-daygrid-day-number {
+        color: var(--text-color) !important;
+    }
+    
+    .fc-daygrid-day.fc-day-today .fc-daygrid-day-number {
+        background: var(--primary-gradient) !important;
+        color: white !important;
+        border-radius: 50% !important;
+        width: 30px !important;
+        height: 30px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-weight: 600 !important;
+    }
+    
+    .fc-button {
+        color: var(--text-color) !important;
+        background: var(--button-bg) !important;
+        border: 1px solid var(--border-color) !important;
+    }
+    
+    .fc-button:hover {
+        background: var(--button-hover-bg) !important;
+    }
+    
+    .fc-button:disabled {
+        opacity: 0.5 !important;
+    }
+    
+    .fc-daygrid-day.fc-day-other {
+        background: var(--other-day-bg) !important;
+    }
+    
+    .fc-daygrid-day.fc-day-other .fc-daygrid-day-number {
+        color: var(--other-day-text) !important;
+    }
+    
+    /* List view styles */
+    .fc-list-event {
+        background: var(--list-event-bg) !important;
+        border: 2px solid var(--list-event-border) !important;
+        border-radius: 12px !important;
+        margin-bottom: 8px !important;
+        padding: 16px 20px !important;
+        transition: all 0.3s ease !important;
+        position: relative !important;
+        overflow: hidden !important;
+    }
+    
+    .fc-list-event:hover {
+        background: var(--list-event-hover-bg) !important;
+        border-color: var(--list-event-hover-border) !important;
+        transform: translateX(10px) scale(1.02) !important;
+        box-shadow: var(--list-event-hover-shadow) !important;
+    }
+    
+    .fc-list-event-dot {
+        border-color: var(--event-dot-color) !important;
+        background-color: var(--event-dot-color) !important;
+        width: 14px !important;
+        height: 14px !important;
+        border-radius: 50% !important;
+    }
+    
+    .fc-list-event-title {
+        color: var(--list-event-title) !important;
+        font-weight: 600 !important;
+        font-size: 1.1rem !important;
+        margin-bottom: 4px !important;
+    }
+    
+    .fc-list-event-time {
+        color: var(--list-event-time) !important;
+        font-size: 0.95rem !important;
+        font-weight: 500 !important;
+    }
+    
+    .fc-list-day-text {
+        color: var(--list-day-text) !important;
+        font-weight: 700 !important;
+        font-size: 1.3rem !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.5px !important;
+    }
+    
+    .fc-list-day-side-text {
+        color: var(--list-day-side-text) !important;
+        font-weight: 500 !important;
+        font-size: 1rem !important;
+    }
+    
+    .fc-list-day {
+        background: var(--list-day-bg) !important;
+        border-bottom: 3px solid var(--list-day-border) !important;
+        padding: 16px 20px !important;
+        margin-bottom: 16px !important;
+        border-radius: 12px !important;
+    }
+    
+    /* Loading spinner */
+    .calendar-loading {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 200px;
+    }
+    
+    .loading-spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid rgba(255, 255, 255, 0.1);
+        border-left: 4px solid #667eea;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Theme toggle functionality
+    const themeToggle = document.getElementById('theme-toggle');
+    const themeIcon = document.getElementById('theme-icon');
+    const themeText = document.getElementById('theme-text');
+    
+    // Check for saved theme preference or use system preference
+    const savedTheme = localStorage.getItem('theme');
+    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    
+    // Set initial theme
+    let currentTheme = savedTheme || (systemPrefersDark ? 'dark' : 'light');
+    applyTheme(currentTheme);
+    
+    // Toggle theme on button click
+    themeToggle.addEventListener('click', function() {
+        currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        applyTheme(currentTheme);
+        localStorage.setItem('theme', currentTheme);
+    });
+    
+    function applyTheme(theme) {
+        if (theme === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            themeIcon.className = 'fas fa-sun me-2';
+            themeText.textContent = 'Light Mode';
+        } else {
+            document.documentElement.setAttribute('data-theme', 'light');
+            themeIcon.className = 'fas fa-moon me-2';
+            themeText.textContent = 'Dark Mode';
+        }
+    }
+
+    // Calendar initialization
+    var calendarEl = document.getElementById('calendar');
+    
+    // Show loading spinner initially
+    calendarEl.innerHTML = '<div class="calendar-loading"><div class="loading-spinner"></div></div>';
+    
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,listWeek'
+        },
+        height: 'auto',
+        events: '{% url "calendar_events" %}',
+        eventDisplay: 'block',
+        eventColor: '#667eea',
+        eventTextColor: '#ffffff',
+        dayMaxEvents: true,
+        moreLinkClick: 'popover',
+        eventClick: function(info) {
+            alert('Lead: ' + info.event.title + '\nDate: ' + info.event.start.toDateString());
+        },
+        eventDidMount: function(info) {
+            info.el.style.cursor = 'pointer';
+        },
+        loading: function(isLoading) {
+            if (isLoading) {
+                document.body.style.cursor = 'wait';
+            } else {
+                document.body.style.cursor = 'default';
+            }
+        },
+        eventTimeFormat: {
+            hour: 'numeric',
+            minute: '2-digit',
+            meridiem: 'short'
+        },
+        firstDay: 1,
+        selectable: true,
+        selectMirror: true,
+        select: function(arg) {
+            console.log('Date selected:', arg.startStr);
+        }
+    });
+    
+    calendar.render();
+    
+    // Handle window resize
+    window.addEventListener('resize', function() {
+        calendar.updateSize();
+    });
+});
+</script>
+{% endblock %}
